@@ -2,11 +2,10 @@ import cv2
 import tempfile
 import os
 from s3 import upload_to_bucket
+import constants
 
-PNG_EXTENSION = ".png"
 
-
-def getImagesForOCR(filename, conversationName, senderName, receiverName, darkMode):
+def getImagesForOCR(filename, dirName, senderName, receiverName, darkMode):
     orig_image = cv2.imread(filename)
 
     # Get dimensions of original screenshot and
@@ -67,7 +66,10 @@ def getImagesForOCR(filename, conversationName, senderName, receiverName, darkMo
         for i in range(len(rects)):
             x, y, w, h = rects[i]
             cropped_image_name = (
-                str(i) + str(receiverName if x == 0 else senderName) + PNG_EXTENSION
+                str(i)
+                + "_"
+                + str(receiverName if x == 0 else senderName)
+                + constants.PNG_EXTENSION
             )
             cv2.imwrite(
                 os.path.join(tmpdirname, cropped_image_name),
@@ -75,5 +77,5 @@ def getImagesForOCR(filename, conversationName, senderName, receiverName, darkMo
             )
             upload_to_bucket(
                 os.path.join(tmpdirname, cropped_image_name),
-                os.path.join(conversationName, cropped_image_name),
+                os.path.join(dirName, cropped_image_name),
             )
